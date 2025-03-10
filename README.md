@@ -1,6 +1,6 @@
 # Cross Tokenizer Distillation
 
-This repository contains an implementation of **Cross Tokenizer Distillation**, inspired by the approach described in the paper [*cite paper here*]. The goal is to improve small-scale models by leveraging larger models as supervisors, in addition to the standard cross-entropy loss.
+This repository contains an implementation of **Cross Tokenizer Distillation**, inspired by the approach described in the paper cited below. The goal is to improve small-scale models by leveraging larger models as supervisors, in addition to the standard cross-entropy loss.
 
 ## Models Used
 - **Teacher Model**: [`microsoft/phi-3-mini-instruct`](https://huggingface.co/microsoft/phi-3-mini-instruct)
