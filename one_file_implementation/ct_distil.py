@@ -11,12 +11,10 @@ import logging
 import json
 import numpy as np
 import pdb
-# Configuration
 device = torch.device("cuda:0")
 save_dir = "/home/users/mananu/llm_things/distillation_op"
 os.makedirs(save_dir, exist_ok=True)
 
-# Setup logging
 logging.basicConfig(
     filename=os.path.join(save_dir, 'training.log'),
     level=logging.INFO,
@@ -37,19 +35,17 @@ def custom_collate_fn(tokenizer, model_name=""):
         
         is_phi_model = "phi" in model_name.lower()
         
-        # Process each item in the batch
         for item in batch:
             paragraph = item["paragraph_text"]
             question = item["question"]
             
-            # Process multiple answers
+            # Handle multiple answers
             answer_list = item['original_nq_answers']
             answers = [ans.get('string', '') for ans in answer_list if ans.get('string', '')]
             answer_part = "; ".join(answers) if answers else ""
             
-            # Format text differently based on model type
             if is_phi_model:
-                # Phi model uses chat markup format
+                # Phi model prompt template
                 system_message = "You are a helpful and precise question answering assistant."
                 user_message = f"Answer the following question based on the given context:\n\nContext: {paragraph}\n\nQuestion: {question}"
                 
@@ -57,11 +53,10 @@ def custom_collate_fn(tokenizer, model_name=""):
             else:
                 # Default format for other models
                 input_part = f"{paragraph}\n{question}"
-                full_text = f"<s>{input_part}</s><s>{answer_part}</s>"  # Removed extra space before </s>
+                full_text = f"<s>{input_part}</s><s>{answer_part}</s>" 
             
             full_texts.append(full_text)
         
-        # Tokenize the full sequences
         tokenized = tokenizer(
             full_texts,
             padding="longest",
@@ -70,8 +65,7 @@ def custom_collate_fn(tokenizer, model_name=""):
             return_tensors="pt"
         )
         
-        # Create labels: copy the input_ids
-        labels = tokenized["input_ids"].clone()
+=        labels = tokenized["input_ids"].clone()
         
         for i, text in enumerate(full_texts):
             if is_phi_model:
@@ -83,19 +77,14 @@ def custom_collate_fn(tokenizer, model_name=""):
                     
                     labels[i, :input_tokens_len] = -100
             else:
-                # Split on the transition between input and answer sections
                 parts = text.split("</s><s>")
                 if len(parts) > 1:
-                    # Reconstruct the input portion including the separator
                     input_part = parts[0] + "</s><s>"
                     
-                    # Calculate token length without adding special tokens
                     input_tokens_len = len(tokenizer(input_part, add_special_tokens=False)['input_ids'])
                     
-                    # Mask input portion in labels
                     labels[i, :input_tokens_len] = -100
         
-        # Mask padding tokens
         labels[labels == tokenizer.pad_token_id] = -100
         tokenized["labels"] = labels
         return tokenized
@@ -108,16 +97,10 @@ student_tokenizer = AutoTokenizer.from_pretrained("bigscience/bloomz-560m")
 
 te_collate_fn  = custom_collate_fn(teacher_tokenizer,"phi")
 st_collate_fn = custom_collate_fn(student_tokenizer,"stud")
-# Tokenize datasets
 teacher_dataset = dataset
 
 student_dataset = dataset
 
-# # Create data collators with dynamic padding
-# teacher_collator = DataCollatorWithPadding(teacher_tokenizer, padding="longest")
-# student_collator = DataCollatorWithPadding(student_tokenizer, padding="longest")
-
-# Create DataLoaders with collators
 
 te_dataloader = DataLoader(
     teacher_dataset['train'],
@@ -197,17 +180,14 @@ class DistillationLoss(nn.Module):
         student = student_predictions.logits
         teacher = teacher_predictions.logits
 
-        # Get answer first token and answer size
         student_answer_index, student_answer_size = self.__get_start_and_size_answers(
             student_targets)
         teacher_answer_index, teacher_answer_size = self.__get_start_and_size_answers(
             teacher_targets)
 
-        # Avoid eos token, if needed
         if self.skip_student_eos: student_answer_size = [size-1 for size in student_answer_size]
         if self.skip_teacher_eos: teacher_answer_size = [size-1 for size in teacher_answer_size]
 
-        # Align answer first token, pad to right and compute softmax
         for i in range(student.size(0)):
             shift = student_answer_index[i]
             size = student_answer_size[i]
