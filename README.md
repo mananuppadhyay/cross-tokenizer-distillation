@@ -1,10 +1,17 @@
-## Approach
-This repository is an implementation of Cross Tokenizer distillation, taken from the paper cited below.
-I have used "microsoft/phi-3-mini-instruct" as the teacher model and "bigscience/bloomz-560m" as the student model. This aims to demonstrate the improvements possible on very small scale models by using bigger models as supervisors in addition to the regular cross-entropy loss.
+# Cross Tokenizer Distillation
 
-The dataset used here is QED.
+This repository contains an implementation of **Cross Tokenizer Distillation**, inspired by the approach described in the paper [*cite paper here*]. The goal is to improve small-scale models by leveraging larger models as supervisors, in addition to the standard cross-entropy loss.
 
-We observe an increase in F1 score of the bloomz-560m from 0.55 to 0.588 by using the apprach mentioned in the paper. Refer to the paper for benchmarks on the QED dataset.
+## Models Used
+- **Teacher Model**: [`microsoft/phi-3-mini-instruct`](https://huggingface.co/microsoft/phi-3-mini-instruct)
+- **Student Model**: [`bigscience/bloomz-560m`](https://huggingface.co/bigscience/bloomz-560m)
+
+## Dataset
+This implementation is trained on the **QED dataset** ([QED on Hugging Face](https://huggingface.co/datasets/qed)).
+
+## Results
+We observe an improvement in the **F1 score** of `bloomz-560m` from **0.55** to **0.588** using Cross Tokenizer Distillation. For benchmarks on the QED dataset, please refer to the original paper.
+
 
 ## Citations
 @misc{boizard2024crosstokenizer,
