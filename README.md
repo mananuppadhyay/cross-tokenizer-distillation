@@ -1,7 +1,9 @@
 ## Approach
 This repository is an implementation of Cross Tokenizer distillation, taken from the paper cited below. We have used "microsofot/phi-3-mini-instruct" as the teacher model and "bigscience/bloomz-560m" as the student model. This aims to demonstrate the improvements possible on very small scale models by using bigger models as supervisors in addition to the regular cross-entropy loss.
 
-The dataset used here is QED. We observe an increase in F1 score of the bloomz-560m from 0.55 to 0.588 by using the apprach mentioned in the paper. Refer to the paper for benchmarks on the QED dataset.
+The dataset used here is QED.
+
+We observe an increase in F1 score of the bloomz-560m from 0.55 to 0.588 by using the apprach mentioned in the paper. Refer to the paper for benchmarks on the QED dataset.
 
 ## Citations
 @misc{boizard2024crosstokenizer,
